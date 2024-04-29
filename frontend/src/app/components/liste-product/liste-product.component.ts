@@ -1,58 +1,53 @@
-import { Component } from '@angular/core';
-import { Observable, combineLatest, map, startWith } from 'rxjs';
+import { Component, ElementRef, OnInit, Output, ViewChild } from '@angular/core';
+import { BehaviorSubject, Observable, catchError, combineLatest, debounceTime, distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
 import { ApiService } from '../../api.service';
 import { Product } from '../../shared/types/product';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { AjouterProduit } from '../../shared/states/panier-state';
 import { Store } from '@ngxs/store';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-liste-product',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule],
   templateUrl: './liste-product.component.html',
-  styleUrl: './liste-product.component.css'
+  styleUrl: './liste-product.component.css',
+  providers: [ApiService],
 })
-export class ListeProductComponent {
-  
-  searchForm = this.fb.group({
-    nom: [''],
-    categorie: [''],
-  });
+export class ListeProductComponent implements OnInit {
 
   products$!: Observable<Product[]>;
   categories$!: Observable<string[]>;
+  @ViewChild('rechercheInput', { static: true }) rechercheInput!: ElementRef;
+  @Output() searchEvent = new BehaviorSubject<string>('');
 
-  constructor(private apiService: ApiService, private fb:FormBuilder, private store: Store) {
-    this.products$ = this.getProducts();
-    this.categories$ = this.apiService.getCategories();
+  constructor(private apiService: ApiService, private store: Store) {
+    this.products$ = this.apiService.getProduits();
+    //this.categories$ = this.apiService.getCategories();
   }
-  
-  private getProducts(): Observable<Product[]> {
-    const products$ = this.apiService.getProducts();
-    const recherche$ = this.searchForm.valueChanges.pipe(startWith(this.searchForm.value));
-
-    return combineLatest(products$, recherche$).pipe(
-      map(([products, { nom, categorie}]) => {
-        return products.filter(product => {
-          const nomDescription = product.name.toLowerCase() + product.description.toLowerCase();
-          return (!nom || nomDescription.includes(nom.toLowerCase())) && (!categorie || product.category === categorie);
-      });
-    }));
-  }
-
-  triCroissant(): void {
-    this.products$ = this.products$.pipe(
-      map(products => {
-        return products.sort((a, b) => a.price - b.price);
-      })
+  ngOnInit(): void {
+    this.products$ = this.searchEvent.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string) =>
+        searchTerm.trim() === ''
+          ? this.apiService.getProduits()
+          : this.apiService.getSearchProduits(searchTerm).pipe(
+            catchError(() => of([] as Product[])),
+            startWith([] as Product[])
+          )
+      )
     );
+
+    this.searchEvent.next('');
   }
 
+  onSearchInputChange(searchTerm: string): void {
+    this.searchEvent.next(searchTerm);
+  }
 
   ajouterAuPanier(produit: Product) {
     this.store.dispatch(new AjouterProduit(produit));
   }
-  
 }

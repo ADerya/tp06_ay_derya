@@ -41,11 +41,10 @@ export class LoginComponent implements OnInit {
         this.cnx = true;
         
         console.log('Login response: ', response);
-        alert('Vous êtes connecté !');
         this.router.navigateByUrl('/catalogue');
     },
     (error) => {
-      this.error = "Erreur de connexion ! Veuillez vérifier vos identifiants."
+      this.error = "Erreur de connexion ! Veuillez vérifier vos identifiants. Essayez login: derya et mdp: derya !"
       console.log('Login error: ', error);
     }
   );

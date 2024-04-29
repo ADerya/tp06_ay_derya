@@ -18,23 +18,25 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	}
 	
 	function  getSearchCalatogue (Request $request, Response $response, $args) {
-	    $flux = '[{"titre":"linux","ref":"001","prix":"20"},{"titre":"java","ref":"002","prix":"21"},{"titre":"windows","ref":"003","prix":"22"},{"titre":"angular","ref":"004","prix":"23"},{"titre":"unix","ref":"005","prix":"25"},{"titre":"javascript","ref":"006","prix":"19"},{"titre":"html","ref":"007","prix":"15"},{"titre":"css","ref":"008","prix":"10"}]';
+		$flux = file_get_contents("./assets/mock/products.json");
+		$flux = json_decode($flux, true);
+		$filteredFlux = array_filter($flux, function ($item) use ($args) {
+			return strpos(strtolower($item['name']), strtolower($args['filtre'])) !== false;
+		  });
 		
-	   $response->getBody()->write($flux);
-	   
-	    return addHeaders ($response);
+		  $filteredFlux = array_values($filteredFlux);
+		
+		  $jsonData = json_encode($filteredFlux);
+		  $response = $response->withHeader('Content-Type', 'application/json');
+		  $response->getBody()->write($jsonData);
+		
+		  return addHeaders($response);
 	}
 
 	// API Nécessitant un Jwt valide
 	function getCatalogue (Request $request, Response $response, $args) {
-	    //$flux = '[{"titre":"linux","ref":"001","prix":"20"},{"titre":"java","ref":"002","prix":"21"},{"titre":"windows","ref":"003","prix":"22"},{"titre":"angular","ref":"004","prix":"23"},{"titre":"unix","ref":"005","prix":"25"},{"titre":"javascript","ref":"006","prix":"19"},{"titre":"html","ref":"007","prix":"15"},{"titre":"css","ref":"008","prix":"10"}]';
-	    
-	    //$response->getBody()->write($flux);
-	    
-	    //return addHeaders ($response);
 
-
-        $path = "../frontend/src/app/assets/mock/products.json";
+        $path = "./assets/mock/products.json";
 
         if (file_exists($path)) {
             $jsonContent = file_get_contents($path);
@@ -87,12 +89,12 @@ use Psr\Http\Message\ServerRequestInterface as Request;
             $username = $body['login'];
             $password = $body['password'];
 
-            if ($username === 'emma' && $password === 'derya') {
+            if ($username === 'derya' && $password === 'derya') {
                 $token = createJWT($response);
 
                 $userData = [
-                    'nom' => 'Nom',
-                    'prenom' => 'Emma',
+                    'nom' => 'Odede',
+                    'prenom' => 'Derya',
                 ];
                 
                 $flux = json_encode($userData);

@@ -6,13 +6,13 @@ import { FooterComponent } from './components/footer/footer.component';
 import { FormulaireComponent } from './components/formulaire/formulaire.component';
 import { RecapitulatifComponent } from './components/recapitulatif/recapitulatif.component';
 import { TetiereComponent } from './components/tetiere/tetiere.component';
-import { ListeProductComponent } from './components/liste-product/liste-product.component';
 import { CarteModule } from './modules/carte/carte.module';
+import { ListeProductComponent } from './components/liste-product/liste-product.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, TetiereComponent, FormulaireComponent, FooterComponent, RecapitulatifComponent, ListeProductComponent, FormsModule, CommonModule, CarteModule],
+  imports: [RouterOutlet, TetiereComponent, FormulaireComponent, FooterComponent, RecapitulatifComponent, FormsModule, CommonModule, CarteModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

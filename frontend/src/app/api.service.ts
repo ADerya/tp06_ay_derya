@@ -11,9 +11,6 @@ import { Client } from './shared/types/client';
 export class ApiService {
 
   constructor(private http:HttpClient) { }
-    public getProducts () : Observable<Product[]> {
-        return this.http.get<Product[]>(environment.backendClient);
-    }
 
     public getCategories () : Observable<string[]> {
       return this.http.get<Product[]>(environment.backendClient).pipe(
@@ -27,10 +24,6 @@ export class ApiService {
       );
     }
 
-
-    login(login: string | undefined | null, password: string | undefined | null): Observable<any> {
-      return this.http.post<any>(environment.backendLoginClient + "login", { login: login, password: password });
-    }
   
     public loginClient(email: string, password: string): Observable<Client> {
       let data: String;
